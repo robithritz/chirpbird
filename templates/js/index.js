@@ -14,8 +14,10 @@ window.onload = async function () {
   const btnCreateRoom = document.getElementById("button-create-room");
   const chatContainer = document.getElementById("chat-container");
   const chatTitle = document.getElementById("chat-title");
+  const btnLogout = document.getElementById("button-logout");
 
   btnCreateRoom.addEventListener('click', createRoom);
+  btnLogout.addEventListener('click', logout);
   labelName.innerText = "Welcome, " + name;
 
   document.getElementById("form").onsubmit = function () {
@@ -25,7 +27,7 @@ window.onload = async function () {
     if (!msg.value) {
       return false;
     }
-    conn.send(msg.value);
+    conn.send(`{"message":"${msg.value}","room_id":${msg.getAttribute('room_id')}}`);
     msg.value = "";
     return false;
   };
@@ -92,7 +94,6 @@ window.onload = async function () {
     });
 
     const payload = await response.json()
-    console.log(payload);
     return {
       token: token,
       id: payload.id,
@@ -129,7 +130,6 @@ window.onload = async function () {
       response = await response.json();
 
       if (response["room_id"]) {
-        console.log(response["room_id"]);
         listRooms.push({
           roomId: response["room_id"],
           roomType: roomType,
@@ -138,8 +138,11 @@ window.onload = async function () {
           chats: []
         });
         chatContainer.style.display = "block";
+        chatContainer.setAttribute("room_id", response["room_id"]);
         participants.splice(participants.indexOf(username), 1);
         chatTitle.innerText = participants.join(", ");
+        msg.setAttribute('room_id', response["room_id"]);
+        log.innerText = "";
       }
       $("#select-usernames").val([]).change();
     }
@@ -150,10 +153,9 @@ window.onload = async function () {
       try {
         conn = new WebSocket("ws://" + document.location.host + "/ws?token=" + token);
       } catch (err) {
-        console.log("ERR");
+        console.log(err);
       }
       conn.onclose = function (evt) {
-        console.error("Closed.");
         setTimeout(function () {
           connect();
         }, 5000);
@@ -178,39 +180,46 @@ window.onload = async function () {
           listRooms.some(v => {
             if (v['roomId'] == roomId) {
               roomExist = true;
+              v.chats.push(parsed)
               return true;
             }
             return false;
           });
           if (!roomExist) {
-            console.log("getting room info ", roomId);
             const roomInfo = await getRoomInfo(roomId);
             listRooms.push({
               roomId: roomId,
               ...roomInfo,
-              chats: []
+              chats: [parsed]
             })
-
-            renderRooms();
           }
 
-          messageTitle.innerText = parsed['WriterName'];
-          messageContent.innerText = parsed['Data'];
+          renderRooms();
 
-          messageBox.classList.add('mb-4', 'p-10', 'message-box', 'd-col');
-          messageTitle.classList.add('message-title');
-          messageContent.classList.add('message-content');
-          if (parsed['WriterUsername'] == username) {
-            wrapper.classList.add('wrapper-self')
-            messageTitle.innerText = "You";
+          if (chatContainer.getAttribute("room_id") == roomId) {
+            messageTitle.innerText = parsed['WriterName'];
+            messageContent.innerText = parsed['Data'];
+
+            messageBox.classList.add('mb-4', 'p-10', 'message-box', 'd-col');
+            messageTitle.classList.add('message-title');
+            messageContent.classList.add('message-content');
+            if (parsed['WriterUsername'] == username) {
+              wrapper.classList.add('wrapper-self')
+              messageTitle.innerText = "You";
+            } else {
+              wrapper.classList.add('wrapper-other')
+            }
+
+            messageBox.appendChild(messageTitle);
+            messageBox.appendChild(messageContent);
+            wrapper.appendChild(messageBox);
+            appendLog(wrapper);
           } else {
-            wrapper.classList.add('wrapper-other')
+            const roomListItem = document.getElementById("room-list-item-" + roomId);
+            const roomListItemBadge = document.createElement("span");
+            roomListItemBadge.innerText = "new";
+            roomListItem.appendChild(roomListItemBadge);
           }
-
-          messageBox.appendChild(messageTitle);
-          messageBox.appendChild(messageContent);
-          wrapper.appendChild(messageBox);
-          appendLog(wrapper);
         }
       };
     } else {
@@ -224,13 +233,75 @@ window.onload = async function () {
     const divRoomList = document.getElementById("room-list");
     divRoomList.innerHTML = "";
     listRooms.forEach((v, i) => {
-      const roomBox = document.createElement("div");
-      roomBox.classList.add("room-box", "p-10", "mb-4");
-      roomBox.setAttribute('room_id', v["room_id"]);
-      roomBox.innerText = v["participants"].join(", ");
+      const roomListItem = document.createElement("div");
+      const roomListItemTitle = document.createElement("label");
+      let participants = v["participants"];
+      const myIndex = participants.indexOf(username);
+      if (myIndex >= 0) {
+        participants.splice(myIndex, 1);
+      }
+      roomListItem.classList.add("p-10", "mb-4", "d-row", "room-list-item");
+      roomListItem.id = "room-list-item-" + v["roomId"];
+      roomListItem.setAttribute('room_id', v["roomId"]);
+      roomListItemTitle.innerText = participants.join(", ");
+      roomListItem.appendChild(roomListItemTitle);
+      roomListItem.addEventListener('click', showChatRoom)
 
-      divRoomList.appendChild(roomBox)
+      divRoomList.appendChild(roomListItem)
     })
+  }
+
+  function showChatRoom() {
+    roomId = this.getAttribute("room_id");
+
+    if (this.childElementCount > 1) {
+      this.removeChild(this.childNodes[1]);
+    }
+
+    let roomIndex = -1;
+    listRooms.some((val, idx) => {
+      if (val["roomId"] == roomId) {
+        roomIndex = idx;
+        return true;
+      }
+      return false;
+    })
+    const data = listRooms[roomIndex];
+
+    let participants = data["participants"];
+    const myIndex = participants.indexOf(username);
+    if (myIndex >= 0) {
+      participants.splice(myIndex, 1);
+    }
+    chatContainer.style.display = "block";
+    chatContainer.setAttribute("room_id", roomId);
+    chatTitle.innerText = participants.join(", ");
+    msg.setAttribute('room_id', data["roomId"]);
+    log.innerText = "";
+    data["chats"].forEach((v, i) => {
+      const wrapper = document.createElement("div");
+      const messageBox = document.createElement("div");
+      const messageTitle = document.createElement("label");
+      const messageContent = document.createElement("span");
+      messageTitle.innerText = v['WriterName'];
+      messageContent.innerText = v['Data'];
+
+      messageBox.classList.add('mb-4', 'p-10', 'message-box', 'd-col');
+      messageTitle.classList.add('message-title');
+      messageContent.classList.add('message-content');
+      if (v['WriterUsername'] == username) {
+        wrapper.classList.add('wrapper-self')
+        messageTitle.innerText = "You";
+      } else {
+        wrapper.classList.add('wrapper-other')
+      }
+
+      messageBox.appendChild(messageTitle);
+      messageBox.appendChild(messageContent);
+      wrapper.appendChild(messageBox);
+      appendLog(wrapper);
+    })
+
   }
 
   async function getRoomInfo(roomId) {
@@ -248,6 +319,12 @@ window.onload = async function () {
     } else {
       return [];
     }
+  }
+
+  function logout(ev) {
+    ev.preventDefault();
+    localStorage.removeItem("token");
+    window.location.href = "/login"
   }
 
   connect();

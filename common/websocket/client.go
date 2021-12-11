@@ -58,7 +58,13 @@ func (s subscription) readPump() {
 			break
 		}
 		t := time.Now()
-		m := Message{string(msg), s.room, s.id, s.name, s.username, t.Format("2006-01-02 15:04:05 -0700")}
+		var dat map[string]interface{}
+		if err := json.Unmarshal(msg, &dat); err != nil {
+			fmt.Println(err)
+		}
+		message := dat["message"].(string)
+		roomId := dat["room_id"].(float64)
+		m := Message{message, fmt.Sprintf("%.0f", roomId), s.id, s.name, s.username, t.Format("2006-01-02 15:04:05 -0700")}
 		H.broadcast <- m
 	}
 }
@@ -108,13 +114,6 @@ func (s *subscription) writePump() {
 func ServeWs(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 	var token string
-	var roomId string
-	if len(params["roomId"]) > 0 {
-		roomId = params["roomId"][0]
-	} else {
-		log.Println("No Room")
-		return
-	}
 	if len(params["token"]) > 0 {
 		token = params["token"][0]
 	} else {
@@ -128,14 +127,13 @@ func ServeWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("New Connection to room : ", roomId)
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err.Error())
 		return
 	}
 	c := &connection{send: make(chan Message, 256), ws: ws}
-	s := subscription{c, roomId, payload.Id, payload.Name, payload.Username}
+	s := subscription{c, payload.Id, payload.Name, payload.Username}
 	H.register <- s
 	// H.rooms[]
 	go s.writePump()

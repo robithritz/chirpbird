@@ -36,6 +36,10 @@
       flex-direction: column;
     }
 
+    .d-row {
+      display: flex;
+    }
+
     .z-1000 {
       z-index: 1000;
     }
@@ -128,7 +132,7 @@
       font-size: 14px;
     }
 
-    .room-box {
+    .room-list-item {
       padding: 10px;
       font-size: 14px;
       background-color: aliceblue;
@@ -140,8 +144,26 @@
       -moz-box-shadow: 3px 5px 18px -2px rgba(0, 0, 0, 0.75);
     }
 
-    .room-box:hover {
+    .room-list-item:hover {
       background-color: #c6ced5;
+    }
+
+    .room-list-item label {
+      width: 80%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    .room-list-item span {
+      flex-grow: 1;
+      text-align: center;
+      background-color: red;
+      border-radius: 25px;
+      font-size: 13px;
+      color: white;
     }
   </style>
 </head>
@@ -150,8 +172,10 @@
   <div class="flex-container d-row">
     <div class="list-chats d-col p-10 mb-4" id="list-chats">
       <div class="user-info-box d-col p-10 mb-4">
-        <label for="" id="label-name" class="grow-2">Welcome, </label>
-
+        <div class="d-row grow-2">
+          <label for="" id="label-name" class="grow-2">Welcome, </label>
+          <a href="#" id="button-logout">logout</a>
+        </div>
         <div class="mb-4">
           <select name="" id="select-usernames" class="select-usernames" multiple>
             <option value="">search user to start new chat</option>
@@ -163,9 +187,6 @@
       </div>
 
       <div class="d-col mb-4" id="room-list">
-        <div class="room-box p-10 mb-4">
-          Robith S
-        </div>
       </div>
 
     </div>
