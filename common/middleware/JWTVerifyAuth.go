@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -12,9 +11,10 @@ import (
 )
 
 type AuthCustomClaims struct {
-	Id       int    `json:"id"`
-	Name     string `json:"name"`
-	Username string `json:"username"`
+	Id        int    `json:"id"`
+	Name      string `json:"name"`
+	Username  string `json:"username"`
+	CreatedAt string `json:"createdAt"`
 	jwt.StandardClaims
 }
 
@@ -31,19 +31,41 @@ func AuthorizeJWT() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-		fmt.Println(payload)
 
+		ctx.Set("username", payload.Username)
+		ctx.Set("id", payload.Id)
+		ctx.Set("name", payload.Name)
 		ctx.Next()
 	}
 }
 
-func JWTGenToken(id int, username string, name string) (string, error) {
+func CheckToken(ctx *gin.Context) {
+	auth := ctx.GetHeader("Authorization")
+
+	_, payload, err := JWTVerifyToken(auth)
+	if err != nil {
+		ctx.IndentedJSON(http.StatusUnauthorized, gin.H{
+			"status":  false,
+			"message": "Unauthorized",
+		})
+		ctx.Abort()
+		return
+	}
+	ctx.IndentedJSON(http.StatusOK, gin.H{
+		"id":       payload.Id,
+		"name":     payload.Name,
+		"username": payload.Username,
+	})
+}
+
+func JWTGenToken(id int, name string, username string, createdAt string) (string, error) {
 	sKey := getSKey()
 
 	claims := &AuthCustomClaims{
-		Id:       id,
-		Name:     name,
-		Username: username,
+		Id:        id,
+		Name:      name,
+		Username:  username,
+		CreatedAt: createdAt,
 		StandardClaims: jwt.StandardClaims{
 			Issuer:   "github.com/robithritz/chirpbird",
 			IssuedAt: time.Now().Unix(),

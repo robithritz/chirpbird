@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chirpbird | Chats</title>
+
+  <link rel="stylesheet" href="assets/css/select2.min.css">
+  <style>
+    body {
+      overflow: hidden;
+      font-family: monospace;
+    }
+
+    .flex-container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .p-10 {
+      padding: 10px;
+    }
+
+    .mb-4 {
+      margin-bottom: 4px;
+    }
+
+    .flex-container.d-col {
+      flex-direction: column;
+    }
+
+    .d-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .z-1000 {
+      z-index: 1000;
+    }
+
+    .chat-box {
+      height: 82%;
+      background-color: #f9fffa;
+      overflow: scroll;
+    }
+
+    .list-chats {
+      width: 26%;
+    }
+
+    .user-info-box {
+      height: 100px;
+      background-color: rgb(19, 211, 106);
+    }
+
+    .grow-1 {
+      flex-grow: 1;
+    }
+
+    .grow-2 {
+      flex-grow: 2;
+    }
+
+    .wrapper-self {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .wrapper-other {
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .message-box {
+      border: 1px solid #b4b4b4;
+      border-radius: 25px;
+      background-color: #48e662;
+      width: 50%;
+    }
+
+    .message-title {
+      color: antiquewhite;
+      font-family: monospace;
+      font-size: 14px;
+      margin-bottom: 2px;
+
+    }
+
+    .message-content {
+      color: #252525;
+      font-family: monospace;
+    }
+
+    .button-default {
+      font-size: 14px;
+      font-family: monospace;
+      padding: 6px 10px;
+      cursor: pointer;
+      border-radius: 25px;
+    }
+
+    .submit-text {
+      font-size: 14px;
+      font-family: monospace;
+      padding: 5px;
+    }
+
+    .chat-title {
+      background-color: #6dd46c;
+      border-radius: 25px 25px 0px 0px;
+      padding: 4px !important;
+      font-size: 14px;
+    }
+
+    .user-info-box {
+      border-radius: 25px;
+      justify-content: space-between;
+    }
+
+    .select-usernames {
+      width: 100%;
+
+    }
+
+    .selection {
+      font-size: 14px;
+    }
+
+    .room-box {
+      padding: 10px;
+      font-size: 14px;
+      background-color: aliceblue;
+      border: 1px solid #acacac;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 3px 5px 18px -2px rgba(0, 0, 0, 0.75);
+      -webkit-box-shadow: 3px 5px 18px -2px rgba(0, 0, 0, 0.75);
+      -moz-box-shadow: 3px 5px 18px -2px rgba(0, 0, 0, 0.75);
+    }
+
+    .room-box:hover {
+      background-color: #c6ced5;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="flex-container d-row">
+    <div class="list-chats d-col p-10 mb-4" id="list-chats">
+      <div class="user-info-box d-col p-10 mb-4">
+        <label for="" id="label-name" class="grow-2">Welcome, </label>
+
+        <div class="mb-4">
+          <select name="" id="select-usernames" class="select-usernames" multiple>
+            <option value="">search user to start new chat</option>
+          </select>
+        </div>
+        <div class="d-col mb-4 z-1000">
+          <button class="button-default" id="button-create-room">Start New Chat</button>
+        </div>
+      </div>
+
+      <div class="d-col mb-4" id="room-list">
+        <div class="room-box p-10 mb-4">
+          Robith S
+        </div>
+      </div>
+
+    </div>
+    <div id="chat-container" style="display: none;" class="flex-container d-col grow-1 p-10 mb-4">
+      <div class="chat-title">
+        <div class="p-10 mb-4">
+          <label id="chat-title">Saepudin</label>
+        </div>
+      </div>
+      <div class="chat-box p-10" id="chat-box">
+
+      </div>
+      <div class="grow-1 wrapper-self">
+        <form id="form">
+          <input type="text" id="msg" class="submit-text" size="64" autofocus />
+          <input type="submit" value="Send" class="button-default" />
+        </form>
+      </div>
+    </div>
+
+  </div>
+</body>
+<script src="assets/js/jquery-3.6.0.min.js"></script>
+<script src="assets/js/select2.min.js"></script>
+<script src="assets/js/index.js"></script>
+
+</html>

@@ -112,7 +112,7 @@ func Authenticate(username string, password string) (string, error) {
 		return "", errors.New("wrong username or password")
 	}
 
-	token, err := middleware.JWTGenToken(obj.Id, obj.Username, obj.Name)
+	token, err := middleware.JWTGenToken(obj.Id, obj.Name, obj.Username, obj.CreatedAt)
 	if err != nil {
 		fmt.Println(err)
 		return "", errors.New("error token generation")

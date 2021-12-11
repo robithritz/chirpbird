@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chirpbird | Register</title>
+
+  <style>
+    body {
+      overflow: hidden;
+    }
+
+    .flex-container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .d-row {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .justify-end {
+      justify-content: end;
+    }
+
+    .d-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .flex-container div {
+      padding: 10px;
+      margin-bottom: 4px;
+    }
+
+    .flex-container.d-col {
+      flex-direction: column;
+    }
+
+    .chat-box {
+      height: 90%;
+      background-color: aqua;
+    }
+
+    .grow-1 {
+      flex-grow: 1;
+    }
+
+    .centerized {
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="flex-container d-col centerized">
+    <div class="">
+      <h3>Register</h3>
+    </div>
+    <form action="" id="login-form">
+      <div class="d-row justify-end">
+        <div>Full Name</div>
+        <div><input type="text" name="name" id="name"></div>
+      </div>
+      <div class="d-row justify-end">
+        <div>Username</div>
+        <div><input type="text" name="username" id="username"></div>
+      </div>
+      <div class="d-row justify-end">
+        <div>Password</div>
+        <div><input type="password" name="password" id="password"></div>
+      </div>
+      <div class="d-row justify-end">
+        <div>Re-type Password</div>
+        <div><input type="password" id="retype-password"></div>
+      </div>
+      <div class="d-row justify-end">
+        <div>
+          <button type="submit" id="register-button">Submit</button>
+        </div>
+      </div>
+    </form>
+
+  </div>
+</body>
+<script src="assets/js/register.js"></script>
+
+</html>
