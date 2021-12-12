@@ -66,7 +66,7 @@ func StartServer() {
 	if port == "" {
 		port = "8080"
 	}
-	router.Run("localhost:" + port)
+	router.Run("0.0.0.0:" + port)
 }
 
 func homePage(ctx *gin.Context) {

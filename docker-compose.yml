@@ -1,0 +1,45 @@
+version: "2.2"
+
+services:
+  database:
+    image: postgres:10.5
+    environment:
+      - POSTGRES_USER=chirpbird
+      - POSTGRES_PASSWORD=123
+      - POSTGRES_DB=chirpbird_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chirpbird -d chirpbird_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5438:5432"
+    networks:
+      - chirpbird-net
+    volumes:
+      - data:/var/lib/postgresql/data
+      - ./db/migrations/create_items_table.sql:/docker-entrypoint-initdb.d/create_items_table.sql
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DB_HOST=database
+      - DB_PORT=5432
+      - DB_USER=chirpbird
+      - DB_PASSWORD=123
+      - DB_NAME=chirpbird_db
+      - SSL_MODE=disable
+    networks:
+      - chirpbird-net
+    ports:
+      - "8080:8080"
+    depends_on:
+      database:
+        condition: service_healthy
+volumes:
+  data:
+
+networks:
+  chirpbird-net:
+    driver: bridge
